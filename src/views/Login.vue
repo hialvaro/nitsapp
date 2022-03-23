@@ -7,19 +7,19 @@
 
     <!-- Login -->
     <form
-      @submit.prevent="login"
       class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
+      @submit.prevent="login"
     >
       <h1 class="text-3xl text-nits-green mb-4">Inicia sessió</h1>
 
       <div class="flex flex-col mb-2">
         <label for="email" class="mb-1 text-sm text-nits-green">Correu</label>
         <input
+          id="email"
+          v-model="email"
           type="email"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="email"
-          v-model="email"
         />
       </div>
 
@@ -28,11 +28,11 @@
           >Contrassenya</label
         >
         <input
+          id="password"
+          v-model="password"
           type="password"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="password"
-          v-model="password"
         />
       </div>
 

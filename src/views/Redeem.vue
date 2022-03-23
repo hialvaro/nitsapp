@@ -11,19 +11,19 @@
 
     <!-- Login -->
     <form
-      @submit.prevent="redeem"
       class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
+      @submit.prevent="redeem"
     >
       <h1 class="text-3xl text-nits-green mb-4">Reclama un premi</h1>
 
       <div class="flex flex-col mb-2">
         <label for="code" class="mb-1 text-sm text-nits-green">Codi</label>
         <input
+          id="code"
+          v-model="code"
           type="text"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="code"
-          v-model="code"
         />
       </div>
 

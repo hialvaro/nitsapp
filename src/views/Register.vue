@@ -7,19 +7,19 @@
 
     <!-- Register -->
     <form
-      @submit.prevent="register"
       class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
+      @submit.prevent="register"
     >
       <h1 class="text-3xl text-nits-green mb-4">Registra't</h1>
 
       <div class="flex flex-col mb-2">
         <label for="email" class="mb-1 text-sm text-nits-green">Email</label>
         <input
+          id="email"
+          v-model="email"
           type="email"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="email"
-          v-model="email"
         />
       </div>
 
@@ -28,11 +28,11 @@
           >Usuari</label
         >
         <input
+          id="username"
+          v-model="username"
           type="text"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="username"
-          v-model="username"
         />
       </div>
 
@@ -41,11 +41,11 @@
           >Contrassenya</label
         >
         <input
+          id="password"
+          v-model="password"
           type="password"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="password"
-          v-model="password"
         />
       </div>
 
@@ -54,11 +54,11 @@
           >Confirma la contrassenya</label
         >
         <input
+          id="confirmPass"
+          v-model="confirmPass"
           type="password"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"
-          id="confirmPass"
-          v-model="confirmPass"
         />
       </div>
 

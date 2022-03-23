@@ -25,7 +25,7 @@
           :to="{ name: 'Register' }"
           >Registra't</router-link
         >
-        <li v-if="user" @click="logout" class="cursor-pointer">Log Out</li>
+        <li v-if="user" class="cursor-pointer" @click="logout">Log Out</li>
       </ul>
     </nav>
   </header>
