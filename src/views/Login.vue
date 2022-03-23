@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import type { ApiError } from "@supabase/supabase-js";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { supabase } from "../supabase";
 
 // Create data / vars
 const router = useRouter();
-const email = ref(null);
-const password = ref(null);
-const errorMsg = ref(null);
+const email = ref<string | undefined>(undefined);
+const password = ref<string | undefined>(undefined);
+const errorMsg = ref<string | null>(null);
 
 // Login function
 const login = async () => {
@@ -20,12 +21,17 @@ const login = async () => {
     if (error) throw error;
     router.push({ name: "Home" });
   } catch (error) {
-    errorMsg.value = `Error: ${error.message}`;
-    setTimeout(() => {
-      errorMsg.value = null;
-    }, 4000);
+    displayError(`Error: ${(error as ApiError).message}`);
   }
 };
+
+function displayError(message: string): void {
+  errorMsg.value = message;
+
+  setTimeout(() => {
+    errorMsg.value = null;
+  }, 4000);
+}
 </script>
 
 <template>
