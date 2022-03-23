@@ -11,7 +11,10 @@
     </div>
 
     <!-- Data -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-10">
+    <div
+      v-else
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-10"
+    >
       <router-link
         v-for="award in awards"
         :key="award.id"
@@ -20,7 +23,11 @@
         :to="{ name: 'View-Award', params: { awardId: award.id } }"
       >
         <!-- Img -->
-        <img v-if="award.owned" src="@/assets/images/infinity.svg" class="h-24 w-auto" />
+        <img
+          v-if="award.owned"
+          src="@/assets/images/infinity.svg"
+          class="h-24 w-auto"
+        />
         <img v-else src="@/assets/images/question.svg" class="h-24 w-auto" />
 
         <p
@@ -31,19 +38,27 @@
             { 'bg-nits-gold': award.type === 'llegendàri' },
           ]"
           class="p-2 mt-6 py-1 text-xs text-white shadow-md rounded lg"
-        >{{ award.type }}</p>
+        >
+          {{ award.type }}
+        </p>
 
         <h1
           v-if="award.owned"
           class="mt-8 mb-2 text-center text-xl text-nits-green"
-        >{{ award.title }}</h1>
+        >
+          {{ award.title }}
+        </h1>
 
-        <h1 v-else class="mt-8 mb-2 text-center text-xl text-dark-grey">{{ award.title }}</h1>
+        <h1 v-else class="mt-8 mb-2 text-center text-xl text-dark-grey">
+          {{ award.title }}
+        </h1>
 
         <h1
           v-if="award.howmany <= 30"
           class="p-2 mt-6 py-1 text-xs text-nits-green bg-grey shadow-md rounded lg"
-        >{{ award.users?.length ?? 0 }} / {{ award.howmany }}</h1>
+        >
+          {{ award.users?.length ?? 0 }} / {{ award.howmany }}
+        </h1>
 
         <h1
           v-if="award.howmany === 999"
