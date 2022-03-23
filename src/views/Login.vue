@@ -36,7 +36,10 @@ const login = async () => {
     </div>
 
     <!-- Login -->
-    <form class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg" @submit.prevent="login">
+    <form
+      class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
+      @submit.prevent="login"
+    >
       <h1 class="text-3xl text-nits-green mb-4">Inicia sessió</h1>
 
       <div class="flex flex-col mb-2">
@@ -51,7 +54,9 @@ const login = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="password" class="mb-1 text-sm text-nits-green">Contrassenya</label>
+        <label for="password" class="mb-1 text-sm text-nits-green"
+          >Contrassenya</label
+        >
         <input
           id="password"
           v-model="password"
@@ -64,7 +69,9 @@ const login = async () => {
       <button
         class="mt-6 py-2 px-6 rounded-sm self-start text-sm text-white bg-nits-green duration-200 border-solid border-2 border-transparent hover:border-nits-green hover:bg-white hover:text-nits-green"
         type="submit"
-      >Entra</button>
+      >
+        Entra
+      </button>
 
       <router-link class="text-sm mt-6 text-center" :to="{ name: 'Register' }">
         No tens compte?
