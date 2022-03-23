@@ -6,7 +6,7 @@ import store from "./stores/index";
 import { RouterView } from "vue-router";
 
 // Create data / vars
-const appReady = ref(null);
+const appReady = ref<boolean>(false);
 
 // Check to see if user is already logged in
 const user = supabase.auth.user();
