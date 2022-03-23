@@ -71,9 +71,9 @@
         class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
         <div
-          class="flex flex-col items-center bg-nits-green shadow-md rounded-md cursor-pointer"
           v-for="(user, index) in data.users"
           :key="index"
+          class="flex flex-col items-center bg-nits-green shadow-md rounded-md cursor-pointer"
         >
           <p class="mt-2 mb-2 text-center text-xl text-nits-green-500">
             {{ user }}

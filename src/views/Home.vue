@@ -15,11 +15,11 @@
       class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-10"
     >
       <router-link
+        v-for="award in data"
+        :key="award.id"
         :class="{ 'border-4 border-nits-light-green rounded-md': award.owned }"
         class="flex flex-col items-center bg-light-grey p-8 shadow-md cursor-pointer"
         :to="{ name: 'View-Award', params: { awardId: award.id } }"
-        v-for="award in data"
-        :key="award.id"
       >
         <!-- Img -->
         <img
