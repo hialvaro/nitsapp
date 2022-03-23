@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
@@ -57,7 +56,10 @@ const register = async () => {
     </div>
 
     <!-- Register -->
-    <form class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg" @submit.prevent="register">
+    <form
+      class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
+      @submit.prevent="register"
+    >
       <h1 class="text-3xl text-nits-green mb-4">Registra't</h1>
 
       <div class="flex flex-col mb-2">
@@ -72,7 +74,9 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="username" class="mb-1 text-sm text-nits-green">Usuari</label>
+        <label for="username" class="mb-1 text-sm text-nits-green"
+          >Usuari</label
+        >
         <input
           id="username"
           v-model="username"
@@ -83,7 +87,9 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="password" class="mb-1 text-sm text-nits-green">Contrassenya</label>
+        <label for="password" class="mb-1 text-sm text-nits-green"
+          >Contrassenya</label
+        >
         <input
           id="password"
           v-model="password"
@@ -94,7 +100,9 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="confirmPass" class="mb-1 text-sm text-nits-green">Confirma la contrassenya</label>
+        <label for="confirmPass" class="mb-1 text-sm text-nits-green"
+          >Confirma la contrassenya</label
+        >
         <input
           id="confirmPass"
           v-model="confirmPass"
@@ -107,7 +115,9 @@ const register = async () => {
       <button
         class="mt-6 py-2 px-6 rounded-sm self-start text-sm text-white bg-nits-green duration-200 border-solid border-2 border-transparent hover:border-nits-green hover:bg-white hover:text-nits-green"
         type="submit"
-      >Registra'm</button>
+      >
+        Registra'm
+      </button>
 
       <router-link class="text-sm mt-6 text-center" :to="{ name: 'Login' }">
         Ja tens un compte?
