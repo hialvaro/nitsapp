@@ -10,10 +10,7 @@
     </div>
 
     <!-- Login -->
-    <form
-      class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
-      @submit.prevent="redeem"
-    >
+    <form class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg" @submit.prevent="redeem">
       <h1 class="text-3xl text-nits-green mb-4">Reclama un premi</h1>
 
       <div class="flex flex-col mb-2">
@@ -30,9 +27,7 @@
       <button
         class="mt-6 py-2 px-6 rounded-md self-start text-sm text-white bg-nits-green duration-200 border-solid border-2 border-transparent hover:border-nits-green hover:bg-white hover:text-nits-green"
         type="submit"
-      >
-        Reclama!
-      </button>
+      >Reclama!</button>
     </form>
   </div>
 </template>
@@ -61,7 +56,7 @@ const redeem = async () => {
       .eq("code", code.value);
 
     // Check if code is linked to an award
-    if (award.length == 0) {
+    if (award.length === 0) {
       errorMsg.value = `Error: El codi que has entrat no existeix`;
       setTimeout(() => {
         errorMsg.value = null;
