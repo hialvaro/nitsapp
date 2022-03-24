@@ -3,12 +3,14 @@ import { ref, computed } from "vue";
 import { supabase } from "../supabase";
 import { useRouter } from "vue-router";
 import store from "../stores/index";
+import type { Award } from "@/types";
+import type { PostgrestError } from "@supabase/supabase-js";
 
 // Create data / vars
 const router = useRouter();
-const code = ref(null);
-const errorMsg = ref(null);
-const successMsg = ref(null);
+const code = ref<string>("");
+const errorMsg = ref<string | null>(null);
+const successMsg = ref<string | null>(null);
 const user = computed(() => store.state.user);
 
 if (!user.value) router.push({ name: "Home" });
@@ -17,12 +19,12 @@ if (!user.value) router.push({ name: "Home" });
 const redeem = async () => {
   try {
     const { data: award, error } = await supabase
-      .from("awards")
+      .from<Award>("awards")
       .select("*")
       .eq("code", code.value);
 
     // Check if code is linked to an award
-    if (award.length === 0) {
+    if (!award || award.length === 0) {
       errorMsg.value = `Error: El codi que has entrat no existeix`;
       setTimeout(() => {
         errorMsg.value = null;
@@ -65,7 +67,7 @@ const redeem = async () => {
     }
     if (error) throw error;
   } catch (error) {
-    errorMsg.value = `Error: ${error.message}`;
+    errorMsg.value = `Error: ${(error as PostgrestError).message}`;
     setTimeout(() => {
       errorMsg.value = null;
     }, 4000);
@@ -85,10 +87,7 @@ const redeem = async () => {
     </div>
 
     <!-- Login -->
-    <form
-      class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
-      @submit.prevent="redeem"
-    >
+    <form class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg" @submit.prevent="redeem">
       <h1 class="text-3xl text-nits-green mb-4">Reclama un premi</h1>
 
       <div class="flex flex-col mb-2">
@@ -105,9 +104,7 @@ const redeem = async () => {
       <button
         class="mt-6 py-2 px-6 rounded-md self-start text-sm text-white bg-nits-green duration-200 border-solid border-2 border-transparent hover:border-nits-green hover:bg-white hover:text-nits-green"
         type="submit"
-      >
-        Reclama!
-      </button>
+      >Reclama!</button>
     </form>
   </div>
 </template>

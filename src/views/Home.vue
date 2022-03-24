@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { supabase } from "../supabase";
-import { RouterLink } from "vue-router";
-
-import store from "../stores/index";
-import type { PostgrestError, User } from "@supabase/supabase-js";
 import type { Award } from "@/types";
+import type { PostgrestError } from "@supabase/supabase-js";
+import { computed, onMounted, ref } from "vue";
+import { RouterLink } from "vue-router";
+import store from "../stores/index";
+import { supabase } from "../supabase";
 
 type LocalAward = Award & { owned: boolean };
 
-const awards = ref<LocalAward[]>([]);
+const awards = ref<LocalAward[] | null>(null);
 const isLoading = ref<boolean>(false);
-const user = computed<User | null>(() => store.state.user);
+const user = computed(() => store.state.user);
 
 onMounted(async () => {
   try {
@@ -22,7 +21,7 @@ onMounted(async () => {
     if (error) throw error;
 
     awards.value = data
-      .map((award) => ({
+      ?.map((award) => ({
         ...award,
         owned: userOwnsAward(award),
       }))
@@ -42,7 +41,7 @@ function userOwnsAward(award: Award): boolean {
 </script>
 
 <template>
-  <div v-if="!isLoading">Carregant...</div>
+  <div v-if="isLoading || !awards">Carregant...</div>
   <div v-else class="container mt-10 px-4">
     <!-- No data -->
     <div v-if="awards.length === 0" class="w-full flex flex-col items-center">
@@ -54,10 +53,7 @@ function userOwnsAward(award: Award): boolean {
     </div>
 
     <!-- Data -->
-    <div
-      v-else
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-10"
-    >
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-10">
       <router-link
         v-for="award in awards"
         :key="award.id"
@@ -66,11 +62,7 @@ function userOwnsAward(award: Award): boolean {
         :to="{ name: 'View-Award', params: { awardId: award.id } }"
       >
         <!-- Img -->
-        <img
-          v-if="award.owned"
-          src="@/assets/images/infinity.svg"
-          class="h-24 w-auto"
-        />
+        <img v-if="award.owned" src="@/assets/images/infinity.svg" class="h-24 w-auto" />
         <img v-else src="@/assets/images/question.svg" class="h-24 w-auto" />
 
         <p
@@ -81,27 +73,19 @@ function userOwnsAward(award: Award): boolean {
             { 'bg-nits-gold': award.type === 'llegendàri' },
           ]"
           class="p-2 mt-6 py-1 text-xs text-white shadow-md rounded lg"
-        >
-          {{ award.type }}
-        </p>
+        >{{ award.type }}</p>
 
         <h1
           v-if="award.owned"
           class="mt-8 mb-2 text-center text-xl text-nits-green"
-        >
-          {{ award.title }}
-        </h1>
+        >{{ award.title }}</h1>
 
-        <h1 v-else class="mt-8 mb-2 text-center text-xl text-dark-grey">
-          {{ award.title }}
-        </h1>
+        <h1 v-else class="mt-8 mb-2 text-center text-xl text-dark-grey">{{ award.title }}</h1>
 
         <h1
           v-if="award.howmany <= 30"
           class="p-2 mt-6 py-1 text-xs text-nits-green bg-grey shadow-md rounded lg"
-        >
-          {{ award.users?.length ?? 0 }} / {{ award.howmany }}
-        </h1>
+        >{{ award.users?.length ?? 0 }} / {{ award.howmany }}</h1>
 
         <h1
           v-if="award.howmany === 999"

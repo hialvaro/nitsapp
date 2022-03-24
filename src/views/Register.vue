@@ -1,24 +1,26 @@
 <script setup lang="ts">
+import type { ApiError, PostgrestError } from "@supabase/supabase-js";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { supabase } from "../supabase";
 
 // Create data / vars
 const router = useRouter();
-const email = ref(null);
-const username = ref(null);
-const password = ref(null);
-const confirmPass = ref(null);
-const errorMsg = ref(null);
+const email = ref<string>("");
+const username = ref<string>("");
+const password = ref<string>("");
+const confirmPass = ref<string>("");
+const errorMsg = ref<string | null>(null);
 
 // Register function
 const register = async () => {
   if (password.value === confirmPass.value) {
     try {
-      const { user, err } = await supabase.auth.signUp({
+      const { user, error: errorSignUp } = await supabase.auth.signUp({
         email: email.value,
         password: password.value,
       });
+      if (errorSignUp) throw errorSignUp;
 
       const updates = {
         id: user.id,
@@ -26,15 +28,16 @@ const register = async () => {
         updated_at: new Date(),
       };
 
-      let { error } = await supabase.from("profiles").upsert(updates, {
-        returning: "minimal", // Don't return the value after inserting
-      });
+      let { error: errorUpsert } = await supabase
+        .from("profiles")
+        .upsert(updates, {
+          returning: "minimal", // Don't return the value after inserting
+        });
 
-      if (err) throw err;
-      if (error) throw error;
+      if (errorUpsert) throw errorUpsert;
       router.push({ name: "Login" });
     } catch (error) {
-      errorMsg.value = error.message;
+      errorMsg.value = (error as PostgrestError | ApiError).message;
       setTimeout(() => {
         errorMsg.value = null;
       }, 4000);
@@ -56,10 +59,7 @@ const register = async () => {
     </div>
 
     <!-- Register -->
-    <form
-      class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
-      @submit.prevent="register"
-    >
+    <form class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg" @submit.prevent="register">
       <h1 class="text-3xl text-nits-green mb-4">Registra't</h1>
 
       <div class="flex flex-col mb-2">
@@ -74,9 +74,7 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="username" class="mb-1 text-sm text-nits-green"
-          >Usuari</label
-        >
+        <label for="username" class="mb-1 text-sm text-nits-green">Usuari</label>
         <input
           id="username"
           v-model="username"
@@ -87,9 +85,7 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="password" class="mb-1 text-sm text-nits-green"
-          >Contrassenya</label
-        >
+        <label for="password" class="mb-1 text-sm text-nits-green">Contrassenya</label>
         <input
           id="password"
           v-model="password"
@@ -100,9 +96,7 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="confirmPass" class="mb-1 text-sm text-nits-green"
-          >Confirma la contrassenya</label
-        >
+        <label for="confirmPass" class="mb-1 text-sm text-nits-green">Confirma la contrassenya</label>
         <input
           id="confirmPass"
           v-model="confirmPass"
@@ -115,9 +109,7 @@ const register = async () => {
       <button
         class="mt-6 py-2 px-6 rounded-sm self-start text-sm text-white bg-nits-green duration-200 border-solid border-2 border-transparent hover:border-nits-green hover:bg-white hover:text-nits-green"
         type="submit"
-      >
-        Registra'm
-      </button>
+      >Registra'm</button>
 
       <router-link class="text-sm mt-6 text-center" :to="{ name: 'Login' }">
         Ja tens un compte?

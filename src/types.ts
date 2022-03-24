@@ -11,3 +11,7 @@ export type Award = {
   type: AwardType;
   users: string[] | null;
 };
+
+export type Profile = {
+  // TODO: Add fields
+};
