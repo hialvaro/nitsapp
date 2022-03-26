@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import type { ApiError, PostgrestError } from "@supabase/supabase-js";
+// Vue
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { supabase } from "../supabase";
+// Appwrite
+import { Appwrite } from "appwrite";
+import type { AppwriteException } from "appwrite";
+import { Server } from "../utils/config";
 
 // Create data / vars
 const router = useRouter();
@@ -11,33 +14,32 @@ const username = ref<string>("");
 const password = ref<string>("");
 const confirmPass = ref<string>("");
 const errorMsg = ref<string | null>(null);
+const successMsg = ref<string | null>(null);
 
 // Register function
 const register = async () => {
   if (password.value === confirmPass.value) {
     try {
-      const { user, error: errorSignUp } = await supabase.auth.signUp({
-        email: email.value,
-        password: password.value,
-      });
-      if (errorSignUp) throw errorSignUp;
+      // Register User
+      let appwrite = new Appwrite();
+      appwrite
+        .setEndpoint(Server.endpoint as string)
+        .setProject(Server.project as string);
 
-      const updates = {
-        id: user.id,
-        username: username.value,
-        updated_at: new Date(),
-      };
-
-      let { error: errorUpsert } = await supabase
-        .from("profiles")
-        .upsert(updates, {
-          returning: "minimal", // Don't return the value after inserting
-        });
-
-      if (errorUpsert) throw errorUpsert;
-      router.push({ name: "Login" });
+      await appwrite.account
+        .create("unique()", email.value, password.value, username.value)
+        .then(
+          (response) => {
+            successMsg.value = "Compte creat correctament.";
+            console.log(response);
+          },
+          (error) => {
+            throw error;
+          }
+        );
+      router.push({ name: "Login", params: { successMsg: successMsg.value } });
     } catch (error) {
-      errorMsg.value = (error as PostgrestError | ApiError).message;
+      errorMsg.value = (error as AppwriteException).message;
       setTimeout(() => {
         errorMsg.value = null;
       }, 4000);
@@ -56,6 +58,10 @@ const register = async () => {
     <!-- Error Handling -->
     <div v-if="errorMsg" class="mb-10 p-4 rounded-md bg-light-grey shadow-lg">
       <p class="text-red-500">{{ errorMsg }}</p>
+    </div>
+
+    <div v-if="successMsg" class="mb-10 p-4 rounded-md bg-light-grey shadow-lg">
+      <p class="text-green-500">{{ successMsg }}</p>
     </div>
 
     <!-- Register -->

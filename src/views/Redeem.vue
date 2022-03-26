@@ -1,73 +1,81 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { supabase } from "../supabase";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
-import store from "../stores/index";
-import type { Award } from "@/types";
-import type { PostgrestError } from "@supabase/supabase-js";
+// Appwrite
+import { Appwrite, Query } from "appwrite";
+import { Server } from "../utils/config";
 
 // Create data / vars
 const router = useRouter();
 const code = ref<string>("");
 const errorMsg = ref<string | null>(null);
 const successMsg = ref<string | null>(null);
-const user = computed(() => store.state.user);
 
-if (!user.value) router.push({ name: "Home" });
+//if (!user.value) router.push({ name: "Home" });
+
+let appwrite = new Appwrite();
+appwrite
+  .setEndpoint(Server.endpoint as string)
+  .setProject(Server.project as string);
+
+let promise = appwrite.account.get();
+promise.then(
+  function (response) {
+    return;
+  },
+  function (error) {
+    console.log(error);
+    router.push({ name: "Home" });
+  }
+);
 
 // Login function
 const redeem = async () => {
   try {
-    const { data: award, error } = await supabase
-      .from<Award>("awards")
-      .select("*")
-      .eq("code", code.value);
+    const user = await appwrite.account.get();
+    // Query the document via code index
+    const tempAward = await appwrite.database.listDocuments(
+      "623dd13a121effab1eaf",
+      [Query.equal("code", code.value)]
+    );
 
-    // Check if code is linked to an award
-    if (!award || award.length === 0) {
-      errorMsg.value = `Error: El codi que has entrat no existeix`;
-      setTimeout(() => {
-        errorMsg.value = null;
-      }, 6000);
+    let award = tempAward.documents[0];
+
+    if (!award) {
+      errorMsg.value = "Aquest codi no existeix!";
+      throw errorMsg.value;
+    } else if (award.users.includes(user.$id as string)) {
+      errorMsg.value = "Ja tens aquest premi!";
+      throw errorMsg.value;
+    } else if (award.howmany <= award.users.length) {
+      errorMsg.value = "Aquest premi està esgotat!";
+      throw errorMsg.value;
     } else {
-      // Check if the award can still be given
-      console.log(award[0]);
-      if (!award[0].users) award[0].users = [];
-      if (award[0].howmany > award[0].users.length) {
-        // Add user to award owners list
-        if (award[0].users.includes(user.value.id)) {
-          errorMsg.value = `Error: Ja tens aquest premi.`;
-          setTimeout(() => {
-            errorMsg.value = null;
-          }, 6000);
-        } else {
-          award[0].users.push(user.value.id);
-
-          // Update the database
-          const { error } = await supabase
-            .from("awards")
-            .update({ users: award[0].users })
-            .eq("id", award[0].id);
-
-          if (error) throw error;
-
+      // Add the user to award owners
+      award.users.push(user.$id);
+      // Update the database
+      let promise = appwrite.database.updateDocument(
+        award.$collection,
+        award.$id,
+        award
+      );
+      promise.then(
+        function (response) {
           // Inform the user
-          successMsg.value = `Has rebut un nou premi: ${award[0].title}`;
+          console.log(response);
+          successMsg.value = `Has rebut un nou premi: ${award.title}`;
           setTimeout(() => {
             successMsg.value = null;
           }, 6000);
           router.push({ name: "Home" });
+        },
+        function (error) {
+          throw error.message;
         }
-      } else {
-        errorMsg.value = `Massa tard! Aquest premi s'ha exhaurit.`;
-        setTimeout(() => {
-          errorMsg.value = null;
-        }, 6000);
-      }
+      );
     }
-    if (error) throw error;
   } catch (error) {
-    errorMsg.value = `Error: ${(error as PostgrestError).message}`;
+    errorMsg.value = `Error: ${error as string}`;
     setTimeout(() => {
       errorMsg.value = null;
     }, 4000);

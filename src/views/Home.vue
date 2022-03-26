@@ -1,21 +1,44 @@
 <script setup lang="ts">
 import type { Award } from "@/types";
-import type { PostgrestError } from "@supabase/supabase-js";
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import store from "../stores/index";
-import { supabase } from "../supabase";
+// Appwrite
+import { Appwrite } from "appwrite";
+import { Server } from "../utils/config";
 
 type LocalAward = Award & { owned: boolean };
+const appwrite = new Appwrite();
+appwrite
+  .setEndpoint(Server.endpoint as string)
+  .setProject(Server.project as string);
 
 const awards = ref<LocalAward[] | null>(null);
 const isLoading = ref<boolean>(false);
-const user = computed(() => store.state.user);
 
 onMounted(async () => {
+  // Init your Web SDK
+
   try {
     isLoading.value = true;
+    let promise = appwrite.account.get();
+    promise.then(
+      function (response) {
+        console.log(response);
+        console.log("Logged in"); // Success
+        isLoading.value = false;
+      },
+      function (error) {
+        isLoading.value = false;
+        throw error; // Failure
+      }
+    );
+  } catch (error) {
+    console.warn(error as string);
+  }
+});
 
+/*try {
     const { data, error } = await supabase.from<Award>("awards").select("*");
 
     if (error) throw error;
@@ -27,7 +50,6 @@ onMounted(async () => {
       }))
       .sort((x, y) => (x.owned === y.owned ? 0 : x.owned ? -1 : 1));
 
-    isLoading.value = false;
   } catch (error) {
     console.warn((error as PostgrestError).message);
   }
@@ -37,7 +59,7 @@ function userOwnsAward(award: Award): boolean {
   if (!user.value || !award.users) return false;
 
   return award.users.includes(user.value.id);
-}
+}*/
 </script>
 
 <template>

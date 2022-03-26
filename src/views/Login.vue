@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import type { ApiError } from "@supabase/supabase-js";
+// Vue
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { supabase } from "../supabase";
+// Appwrite
+import { Appwrite } from "appwrite";
+import { Server } from "../utils/config";
 
 // Create data / vars
 const router = useRouter();
@@ -12,19 +14,27 @@ const errorMsg = ref<string | null>(null);
 
 // Login function
 const login = async () => {
-  try {
-    const { error } = await supabase.auth.signIn({
-      email: email.value,
-      password: password.value,
-    });
+  let appwrite = new Appwrite();
+  appwrite
+    .setEndpoint(Server.endpoint as string)
+    .setProject(Server.project as string);
 
-    if (error) throw error;
-    router.push({ name: "Home" });
-  } catch (error) {
-    displayError(`Error: ${(error as ApiError).message}`);
-  }
+  // Create login session
+  let promise = appwrite.account.createSession(email.value, password.value);
+
+  // Check if session had success
+  promise.then(
+    function () {
+      console.log("Login success."); // Success
+    },
+    function (error) {
+      displayError(`Error: ${error.message as string}`); // Failure
+    }
+  );
+  router.push({ name: "Home" });
 };
 
+// Display errors
 function displayError(message: string): void {
   errorMsg.value = message;
 
@@ -39,6 +49,13 @@ function displayError(message: string): void {
     <!-- Error Handling -->
     <div v-if="errorMsg" class="mb-10 p-4 rounded-md bg-light-grey shadow-lg">
       <p class="text-red-500">{{ errorMsg }}</p>
+    </div>
+
+    <div
+      v-if="$route.params.successMsg"
+      class="mb-10 p-4 rounded-md bg-light-grey shadow-lg"
+    >
+      <p class="text-green-500">{{ $route.params.successMsg }}</p>
     </div>
 
     <!-- Login -->
