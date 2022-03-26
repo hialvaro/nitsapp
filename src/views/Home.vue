@@ -1,65 +1,45 @@
 <script setup lang="ts">
 import type { Award } from "@/types";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-import store from "../stores/index";
 // Appwrite
 import { Appwrite } from "appwrite";
 import { Server } from "../utils/config";
 
-type LocalAward = Award & { owned: boolean };
+/*type LocalAward = Award & { owned: boolean };*/
 const appwrite = new Appwrite();
 appwrite
   .setEndpoint(Server.endpoint as string)
   .setProject(Server.project as string);
 
-const awards = ref<LocalAward[] | null>(null);
+const awards = ref<any>(null);
 const isLoading = ref<boolean>(false);
 
 onMounted(async () => {
   // Init your Web SDK
-
   try {
     isLoading.value = true;
-    let promise = appwrite.account.get();
-    promise.then(
-      function (response) {
-        console.log(response);
-        console.log("Logged in"); // Success
-        isLoading.value = false;
-      },
-      function (error) {
-        isLoading.value = false;
-        throw error; // Failure
-      }
+    const user = await appwrite.account.get();
+    const tempAwards = await appwrite.database.listDocuments(
+      Server.collectionID as string
     );
+
+    awards.value = tempAwards.documents
+      ?.map((award) => ({
+        ...award,
+        owned: userOwnsAward(award, user),
+      }))
+      .sort((x, y) => (x.owned === y.owned ? 0 : x.owned ? -1 : 1));
+    isLoading.value = false;
   } catch (error) {
     console.warn(error as string);
   }
 });
 
-/*try {
-    const { data, error } = await supabase.from<Award>("awards").select("*");
-
-    if (error) throw error;
-
-    awards.value = data
-      ?.map((award) => ({
-        ...award,
-        owned: userOwnsAward(award),
-      }))
-      .sort((x, y) => (x.owned === y.owned ? 0 : x.owned ? -1 : 1));
-
-  } catch (error) {
-    console.warn((error as PostgrestError).message);
-  }
-});
-
-function userOwnsAward(award: Award): boolean {
-  if (!user.value || !award.users) return false;
-
-  return award.users.includes(user.value.id);
-}*/
+function userOwnsAward(award: any, user: any): any {
+  if (!user || !award.users) return false;
+  return award.users.includes(user.$id);
+}
 </script>
 
 <template>
@@ -84,7 +64,7 @@ function userOwnsAward(award: Award): boolean {
         :key="award.id"
         :class="{ 'border-4 border-nits-light-green rounded-md': award.owned }"
         class="flex flex-col items-center bg-light-grey p-8 shadow-md cursor-pointer"
-        :to="{ name: 'View-Award', params: { awardId: award.id } }"
+        :to="{ name: 'View-Award', params: { awardId: award.$id } }"
       >
         <!-- Img -->
         <img
