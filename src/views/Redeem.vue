@@ -20,7 +20,7 @@ appwrite
 
 let promise = appwrite.account.get();
 promise.then(
-  function (response) {
+  function () {
     return;
   },
   function (error) {
