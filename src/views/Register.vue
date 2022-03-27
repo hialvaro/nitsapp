@@ -15,24 +15,27 @@ const errorMsg = ref<string | null>(null);
 const successMsg = ref<string | null>(null);
 
 async function handleRegister(): Promise<void> {
-  if (password.value === confirmPass.value) {
-    try {
-      await register(email.value, password.value, name.value);
+  if (password.value !== confirmPass.value) {
+    errorMsg.value = "Error: Les contrassenyes no coincideixen.";
+    setTimeout(() => {
+      errorMsg.value = null;
+    }, 4000);
 
-      successMsg.value = "Compte creat correctament.";
-      router.push({ name: "Login", params: { successMsg: successMsg.value } });
-    } catch (error) {
-      errorMsg.value = (error as AppwriteException).message;
-      setTimeout(() => {
-        errorMsg.value = null;
-      }, 4000);
-    }
     return;
   }
-  errorMsg.value = "Error: Les contrassenyes no coincideixen.";
-  setTimeout(() => {
-    errorMsg.value = null;
-  }, 4000);
+
+  try {
+    await register(email.value, password.value, name.value);
+
+    successMsg.value = "Compte creat correctament.";
+    router.push({ name: "Login", params: { successMsg: successMsg.value } });
+  } catch (error) {
+    console.error(error);
+    errorMsg.value = (error as AppwriteException).message;
+    setTimeout(() => {
+      errorMsg.value = null;
+    }, 4000);
+  }
 }
 </script>
 
