@@ -9,6 +9,7 @@ const awardsApi = {
   getAllAwards: async (appwrite: Appwrite): Promise<AwardDocument[]> =>
     (await appwrite.database.listDocuments<AwardDocument>(awardsCollectionId))
       .documents,
+
   getAwardsByCode: async (
     appwrite: Appwrite,
     code: string
@@ -18,6 +19,7 @@ const awardsApi = {
         Query.equal("code", code),
       ])
     ).documents,
+
   updateAward: async (
     appwrite: Appwrite,
     award: AwardDocument
