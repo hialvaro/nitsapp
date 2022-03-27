@@ -1,25 +1,20 @@
 <script setup lang="ts">
-import store from "../stores/index";
+//import store from "../stores/index";
 import { computed, ref } from "vue";
-import { supabase } from "../supabase";
-import { useRouter } from "vue-router";
-import { RouterLink } from "vue-router";
-import { Appwrite } from "appwrite";
+import { useRouter, RouterLink } from "vue-router";
+import { sdk } from "@/appwrite";
 
+/*const user = computed(() => appwrite.account.get());*/
+//const userState = computed(() => store.state.user);
 const user = ref<boolean>(false);
 
-const appwrite = new Appwrite();
-
-appwrite
-  .setEndpoint("https://supa.r3d.red/v1")
-  .setProject("623dcfae0a5b8f0027d6");
-
-let promise = appwrite.account.get();
+let promise = sdk.account.get();
 promise.then(
   function (response) {
     user.value = true; // Success
   },
   function (error) {
+    console.log(error);
     user.value = false; // Failure
   }
 );
@@ -29,7 +24,7 @@ promise.then(
 const router = useRouter();
 // Logout function
 const logout = async () => {
-  let promise = appwrite.account.deleteSession("current");
+  let promise = sdk.account.deleteSession("current");
   try {
     promise.then(
       function (response) {

@@ -1,26 +1,22 @@
 <script setup lang="ts">
-import type { Award } from "@/types";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 // Appwrite
-import { Appwrite } from "appwrite";
-import { Server } from "../utils/config";
+import { sdk } from "@/appwrite";
+import { Server } from "@/utils/config";
 
 /*type LocalAward = Award & { owned: boolean };*/
-const appwrite = new Appwrite();
-appwrite
-  .setEndpoint(Server.endpoint as string)
-  .setProject(Server.project as string);
 
 const awards = ref<any>(null);
 const isLoading = ref<boolean>(false);
+
 
 onMounted(async () => {
   // Init your Web SDK
   try {
     isLoading.value = true;
-    const user = await appwrite.account.get();
-    const tempAwards = await appwrite.database.listDocuments(
+    const user = await sdk.account.get();
+    const tempAwards = await sdk.database.listDocuments(
       Server.collectionID as string
     );
 

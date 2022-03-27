@@ -1,10 +1,9 @@
 <script setup lang="ts">
 // Vue
 import { ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 // Appwrite
-import { Appwrite } from "appwrite";
-import { Server } from "../utils/config";
+import { sdk } from "../appwrite";
 
 // Create data / vars
 const router = useRouter();
@@ -14,24 +13,13 @@ const errorMsg = ref<string | null>(null);
 
 // Login function
 const login = async () => {
-  let appwrite = new Appwrite();
-  appwrite
-    .setEndpoint(Server.endpoint as string)
-    .setProject(Server.project as string);
-
   // Create login session
-  let promise = appwrite.account.createSession(email.value, password.value);
-
-  // Check if session had success
-  promise.then(
-    function () {
-      console.log("Login success."); // Success
-    },
-    function (error) {
-      displayError(`Error: ${error.message as string}`); // Failure
-    }
-  );
-  router.push({ name: "Home" });
+  try {
+    await sdk.account.createSession(email.value, password.value);
+    router.push({ name: "Home" });
+  } catch (error) {
+    displayError(`Error: ${error.message as string}`); // Failure
+  }
 };
 
 // Display errors

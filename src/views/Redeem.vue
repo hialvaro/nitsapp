@@ -2,8 +2,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 // Appwrite
-import { Appwrite, Query } from "appwrite";
-import { Server } from "../utils/config";
+import { sdk } from "../appwrite";
+import { Query } from "appwrite";
 
 // Create data / vars
 const router = useRouter();
@@ -13,12 +13,7 @@ const successMsg = ref<string | null>(null);
 
 //if (!user.value) router.push({ name: "Home" });
 
-let appwrite = new Appwrite();
-appwrite
-  .setEndpoint(Server.endpoint as string)
-  .setProject(Server.project as string);
-
-let promise = appwrite.account.get();
+let promise = sdk.account.get();
 promise.then(
   function () {
     return;
@@ -32,12 +27,11 @@ promise.then(
 // Login function
 const redeem = async () => {
   try {
-    const user = await appwrite.account.get();
+    const user = await sdk.account.get();
     // Query the document via code index
-    const tempAward = await appwrite.database.listDocuments(
-      "623dd13a121effab1eaf",
-      [Query.equal("code", code.value)]
-    );
+    const tempAward = await sdk.database.listDocuments("623dd13a121effab1eaf", [
+      Query.equal("code", code.value),
+    ]);
 
     let award = tempAward.documents[0];
 
@@ -54,7 +48,7 @@ const redeem = async () => {
       // Add the user to award owners
       award.users.push(user.$id);
       // Update the database
-      let promise = appwrite.database.updateDocument(
+      let promise = sdk.database.updateDocument(
         award.$collection,
         award.$id,
         award
