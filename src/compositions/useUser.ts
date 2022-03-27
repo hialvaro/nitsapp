@@ -25,7 +25,7 @@ export default function useUser() {
     await getUser();
   }
 
-  async function logout() {
+  async function logout(): Promise<void> {
     await appwrite.account.deleteSession("current");
     await getUser();
   }
