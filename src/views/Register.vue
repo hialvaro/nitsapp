@@ -4,7 +4,7 @@ import type { AppwriteException } from "appwrite";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
-const { registerUser } = useUser();
+const { register } = useUser();
 
 const router = useRouter();
 const email = ref<string>("");
@@ -14,10 +14,10 @@ const confirmPass = ref<string>("");
 const errorMsg = ref<string | null>(null);
 const successMsg = ref<string | null>(null);
 
-const register = async () => {
+async function handleRegister(): Promise<void> {
   if (password.value === confirmPass.value) {
     try {
-      await registerUser(email.value, password.value, name.value);
+      await register(email.value, password.value, name.value);
 
       successMsg.value = "Compte creat correctament.";
       router.push({ name: "Login", params: { successMsg: successMsg.value } });
@@ -33,7 +33,7 @@ const register = async () => {
   setTimeout(() => {
     errorMsg.value = null;
   }, 4000);
-};
+}
 </script>
 
 <template>
@@ -50,7 +50,7 @@ const register = async () => {
     <!-- Register -->
     <form
       class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
-      @submit.prevent="register"
+      @submit.prevent="handleRegister"
     >
       <h1 class="text-3xl text-nits-green mb-4">Registra't</h1>
 

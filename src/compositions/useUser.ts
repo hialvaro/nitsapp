@@ -20,7 +20,7 @@ export default function useUser() {
     }
   }
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string): Promise<void> {
     await appwrite.account.createSession(email, password);
     await getUser();
   }
@@ -30,7 +30,11 @@ export default function useUser() {
     await getUser();
   }
 
-  async function registerUser(email: string, password: string, name: string) {
+  async function register(
+    email: string,
+    password: string,
+    name: string
+  ): Promise<void> {
     await appwrite.account.create<UserPreferences>(
       "unique()",
       email,
@@ -44,6 +48,6 @@ export default function useUser() {
     user: readonly(user),
     login,
     logout,
-    registerUser,
+    register,
   };
 }
