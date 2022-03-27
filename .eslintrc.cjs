@@ -1,6 +1,8 @@
-/* eslint-env node */
 require("@rushstack/eslint-patch/modern-module-resolution");
 
+/**
+ * @type {import('eslint").Linter.Config}
+ */
 module.exports = {
   root: true,
   extends: [
@@ -28,4 +30,16 @@ module.exports = {
   env: {
     "vue/setup-compiler-macros": true,
   },
+  overrides: [
+    {
+      files: ["*.{js,cjs,mjs,ts,cts,mts}"],
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+      },
+      env: {
+        node: true,
+      },
+    },
+  ],
+  ignorePatterns: ["/dist/"],
 };

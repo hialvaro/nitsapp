@@ -1,5 +1,6 @@
-/* eslint-env node */
-
+/**
+ * @type {import('tailwindcss/tailwind-config').TailwindConfig}
+ */
 module.exports = {
   purge: { content: ["./public/**/*.html", "./src/**/*.vue"] },
   darkMode: false, // or 'media' or 'class'
