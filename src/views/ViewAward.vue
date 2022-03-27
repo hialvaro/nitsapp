@@ -1,19 +1,19 @@
 <script setup lang="ts">
+import useAppwrite, { type User } from "@/compositions/useAppwrite";
 import type { Award, Profile } from "@/types";
 import type { PostgrestError } from "@supabase/supabase-js";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { useRoute } from "vue-router";
-import store from "../stores/index";
 import { supabase } from "../supabase";
 
-// Create data / vars
+const { getUser } = useAppwrite();
+
 const data = ref<Award[] | null>(null);
 const errorMsg = ref<string | null>(null);
 const statusMsg = ref<string | null>(null);
 const route = useRoute();
-const user = computed(() => store.state.user);
+const user = ref<User | null>(await getUser());
 
-// Get current Id of route
 const currentId = route.params.awardId;
 
 const getData = async () => {

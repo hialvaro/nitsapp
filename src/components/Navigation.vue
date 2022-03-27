@@ -1,44 +1,29 @@
 <script setup lang="ts">
-//import store from "../stores/index";
-import { computed, ref } from "vue";
-import { useRouter, RouterLink } from "vue-router";
-import { sdk } from "@/appwrite";
+import useAppwrite from "@/compositions/useAppwrite";
+import { onMounted, ref } from "vue";
+import { RouterLink, useRouter } from "vue-router";
 
-/*const user = computed(() => appwrite.account.get());*/
-//const userState = computed(() => store.state.user);
-const user = ref<boolean>(false);
+const { getUser, logout } = useAppwrite();
 
-let promise = sdk.account.get();
-promise.then(
-  function (response) {
-    user.value = true; // Success
-  },
-  function (error) {
-    console.log(error);
-    user.value = false; // Failure
-  }
-);
+const isLoggedIn = ref<boolean>(false);
 
-// Get user from store
-// Setup ref to router
+onMounted(async () => {
+  const user = await getUser();
+
+  isLoggedIn.value = Boolean(user);
+});
+
 const router = useRouter();
-// Logout function
-const logout = async () => {
-  let promise = sdk.account.deleteSession("current");
+
+async function handleLogout(): Promise<void> {
   try {
-    promise.then(
-      function (response) {
-        console.log(response); // Success
-      },
-      function (error) {
-        console.log(error); // Failure
-        router.push({ name: "Home" });
-      }
-    );
+    await logout();
   } catch (error) {
-    console.warn(error);
+    console.error(error);
+
+    router.push({ name: "Home" });
   }
-};
+}
 </script>
 
 <template>
@@ -55,20 +40,28 @@ const logout = async () => {
         <router-link class="cursor-pointer" :to="{ name: 'Home' }"
           >Premis</router-link
         >
-        <router-link v-if="user" class="cursor-pointer" :to="{ name: 'Redeem' }"
+        <router-link
+          v-if="isLoggedIn"
+          class="cursor-pointer"
+          :to="{ name: 'Redeem' }"
           >Reclama</router-link
         >
-        <!--<router-link v-if="user" class="cursor-pointer" :to="{name:''}">Users</router-link>-->
-        <router-link v-if="!user" class="cursor-pointer" :to="{ name: 'Login' }"
+        <!--<router-link v-if="isLoggedIn" class="cursor-pointer" :to="{name:''}">Users</router-link>-->
+        <router-link
+          v-if="!isLoggedIn"
+          class="cursor-pointer"
+          :to="{ name: 'Login' }"
           >Login</router-link
         >
         <router-link
-          v-if="!user"
+          v-if="!isLoggedIn"
           class="cursor-pointer"
           :to="{ name: 'Register' }"
           >Registra't</router-link
         >
-        <li v-if="user" class="cursor-pointer" @click="logout">Log Out</li>
+        <li v-if="isLoggedIn" class="cursor-pointer" @click="handleLogout">
+          Log Out
+        </li>
       </ul>
     </nav>
   </header>

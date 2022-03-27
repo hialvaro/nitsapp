@@ -1,28 +1,25 @@
 <script setup lang="ts">
-// Vue
+import useAppwrite from "@/compositions/useAppwrite";
+import type { AppwriteException } from "appwrite";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-// Appwrite
-import { sdk } from "../appwrite";
+import { useRouter, RouterLink } from "vue-router";
 
-// Create data / vars
+const { login } = useAppwrite();
+
 const router = useRouter();
 const email = ref<string>("");
 const password = ref<string>("");
 const errorMsg = ref<string | null>(null);
 
-// Login function
-const login = async () => {
-  // Create login session
+async function handleLogin(): Promise<void> {
   try {
-    await sdk.account.createSession(email.value, password.value);
+    await login(email.value, password.value);
     router.push({ name: "Home" });
   } catch (error) {
-    displayError(`Error: ${error.message as string}`); // Failure
+    displayError(`Error: ${(error as AppwriteException).message}`);
   }
-};
+}
 
-// Display errors
 function displayError(message: string): void {
   errorMsg.value = message;
 
@@ -49,7 +46,7 @@ function displayError(message: string): void {
     <!-- Login -->
     <form
       class="p-8 flex flex-col bg-light-grey rounded-md shadow-lg"
-      @submit.prevent="login"
+      @submit.prevent="handleLogin"
     >
       <h1 class="text-3xl text-nits-green mb-4">Inicia sessió</h1>
 
@@ -84,10 +81,10 @@ function displayError(message: string): void {
         Entra
       </button>
 
-      <router-link class="text-sm mt-6 text-center" :to="{ name: 'Register' }">
+      <RouterLink class="text-sm mt-6 text-center" :to="{ name: 'Register' }">
         No tens compte?
         <span class="text-nits-green">Registra't</span>
-      </router-link>
+      </RouterLink>
     </form>
   </div>
 </template>

@@ -1,73 +1,45 @@
 <script setup lang="ts">
+import useAppwrite from "@/compositions/useAppwrite";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-// Appwrite
-import { sdk } from "../appwrite";
-import { Query } from "appwrite";
 
-// Create data / vars
+const { getUser, getAwardsByCode, updateAward } = useAppwrite();
+
 const router = useRouter();
 const code = ref<string>("");
 const errorMsg = ref<string | null>(null);
 const successMsg = ref<string | null>(null);
 
-//if (!user.value) router.push({ name: "Home" });
-
-let promise = sdk.account.get();
-promise.then(
-  function () {
-    return;
-  },
-  function (error) {
-    console.log(error);
-    router.push({ name: "Home" });
-  }
-);
-
-// Login function
 const redeem = async () => {
   try {
-    const user = await sdk.account.get();
-    // Query the document via code index
-    const tempAward = await sdk.database.listDocuments("623dd13a121effab1eaf", [
-      Query.equal("code", code.value),
-    ]);
+    const user = await getUser();
+    if (!user) return router.push({ name: "Login" });
 
-    let award = tempAward.documents[0];
+    const award = (await getAwardsByCode(code.value))[0];
 
     if (!award) {
-      errorMsg.value = "Aquest codi no existeix!";
-      throw errorMsg.value;
-    } else if (award.users.includes(user.$id as string)) {
-      errorMsg.value = "Ja tens aquest premi!";
-      throw errorMsg.value;
-    } else if (award.howmany <= award.users.length) {
-      errorMsg.value = "Aquest premi està esgotat!";
-      throw errorMsg.value;
-    } else {
-      // Add the user to award owners
-      award.users.push(user.$id);
-      // Update the database
-      let promise = sdk.database.updateDocument(
-        award.$collection,
-        award.$id,
-        award
-      );
-      promise.then(
-        function (response) {
-          // Inform the user
-          console.log(response);
-          successMsg.value = `Has rebut un nou premi: ${award.title}`;
-          setTimeout(() => {
-            successMsg.value = null;
-          }, 6000);
-          router.push({ name: "Home" });
-        },
-        function (error) {
-          throw error.message;
-        }
-      );
+      throw new Error("Aquest codi no existeix");
     }
+
+    if (!award.users) award.users = [];
+
+    if (award.users.includes(user.$id as string)) {
+      throw new Error("Ja tens aquest premi");
+    }
+
+    if (award.howmany <= award.users.length) {
+      throw new Error("Aquest premi està esgotat");
+    }
+
+    award.users.push(user.$id);
+
+    await updateAward(award);
+
+    successMsg.value = `Has rebut un nou premi: ${award.title}`;
+    setTimeout(() => {
+      successMsg.value = null;
+    }, 6000);
+    router.push({ name: "Home" });
   } catch (error) {
     errorMsg.value = `Error: ${error as string}`;
     setTimeout(() => {

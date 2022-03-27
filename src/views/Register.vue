@@ -1,42 +1,26 @@
 <script setup lang="ts">
 // Vue
+import useAppwrite from "@/compositions/useAppwrite";
+import type { AppwriteException } from "appwrite";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-// Appwrite
-import { Appwrite } from "appwrite";
-import type { AppwriteException } from "appwrite";
-import { Server } from "../utils/config";
 
-// Create data / vars
+const { registerUser } = useAppwrite();
+
 const router = useRouter();
 const email = ref<string>("");
-const username = ref<string>("");
+const name = ref<string>("");
 const password = ref<string>("");
 const confirmPass = ref<string>("");
 const errorMsg = ref<string | null>(null);
 const successMsg = ref<string | null>(null);
 
-// Register function
 const register = async () => {
   if (password.value === confirmPass.value) {
     try {
-      // Register User
-      let appwrite = new Appwrite();
-      appwrite
-        .setEndpoint(Server.endpoint as string)
-        .setProject(Server.project as string);
+      await registerUser(email.value, password.value, name.value);
 
-      await appwrite.account
-        .create("unique()", email.value, password.value, username.value)
-        .then(
-          (response) => {
-            successMsg.value = "Compte creat correctament.";
-            console.log(response);
-          },
-          (error) => {
-            throw error;
-          }
-        );
+      successMsg.value = "Compte creat correctament.";
       router.push({ name: "Login", params: { successMsg: successMsg.value } });
     } catch (error) {
       errorMsg.value = (error as AppwriteException).message;
@@ -83,12 +67,10 @@ const register = async () => {
       </div>
 
       <div class="flex flex-col mb-2">
-        <label for="username" class="mb-1 text-sm text-nits-green"
-          >Usuari</label
-        >
+        <label for="name" class="mb-1 text-sm text-nits-green">Nom</label>
         <input
-          id="username"
-          v-model="username"
+          id="name"
+          v-model="name"
           type="text"
           required
           class="p-2 text-grey-500 focus:outline-none rounded-md"

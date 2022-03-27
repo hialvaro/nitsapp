@@ -1,37 +1,35 @@
 <script setup lang="ts">
+import type { AwardDocument } from "@/api/awards";
+import useAppwrite, { type User } from "@/compositions/useAppwrite";
+import type { Award } from "@/types";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
-// Appwrite
-import { sdk } from "@/appwrite";
-import { Server } from "@/utils/config";
 
-/*type LocalAward = Award & { owned: boolean };*/
+type LocalAward = AwardDocument & { owned: boolean };
 
-const awards = ref<any>(null);
+const { getUser, getAllAwards } = useAppwrite();
+
+const awards = ref<LocalAward[]>([]);
 const isLoading = ref<boolean>(false);
 
 onMounted(async () => {
-  // Init your Web SDK
   try {
     isLoading.value = true;
-    const user = await sdk.account.get();
-    const tempAwards = await sdk.database.listDocuments(
-      Server.collectionID as string
-    );
+    const user = await getUser();
 
-    awards.value = tempAwards.documents
-      ?.map((award) => ({
+    awards.value = (await getAllAwards())
+      ?.map<LocalAward>((award) => ({
         ...award,
-        owned: userOwnsAward(award, user),
+        owned: user ? userOwnsAward(award, user) : false,
       }))
       .sort((x, y) => (x.owned === y.owned ? 0 : x.owned ? -1 : 1));
     isLoading.value = false;
   } catch (error) {
-    console.warn(error as string);
+    console.error(error);
   }
 });
 
-function userOwnsAward(award: any, user: any): any {
+function userOwnsAward(award: Award, user: User): boolean {
   if (!user || !award.users) return false;
   return award.users.includes(user.$id);
 }
