@@ -1,37 +1,47 @@
 import appwrite from "@/appwrite";
 import type { Models } from "appwrite";
+import { onMounted, ref } from "vue";
 
 type UserPreferences = Models.Preferences;
 export type User = Models.User<UserPreferences>;
 
 export default function useUser() {
-  async function getUser(): Promise<User | null> {
+  const user = ref<User | null>(null);
+
+  onMounted(async () => {
+    await getUser();
+  });
+
+  async function getUser(): Promise<void> {
     try {
-      return await appwrite.account.get();
+      user.value = await appwrite.account.get();
     } catch {
-      return null;
+      user.value = null;
     }
   }
 
   async function login(email: string, password: string) {
-    return await appwrite.account.createSession(email, password);
+    await appwrite.account.createSession(email, password);
+    await getUser();
   }
 
   async function logout() {
-    return await appwrite.account.deleteSession("current");
+    await appwrite.account.deleteSession("current");
+    await getUser();
   }
 
   async function registerUser(email: string, password: string, name: string) {
-    return await appwrite.account.create<UserPreferences>(
+    await appwrite.account.create<UserPreferences>(
       "unique()",
       email,
       password,
       name
     );
+    await getUser();
   }
 
   return {
-    getUser,
+    user,
     login,
     logout,
     registerUser,

@@ -8,7 +8,7 @@ import { RouterLink } from "vue-router";
 
 type LocalAward = AwardDocument & { owned: boolean };
 
-const { getUser } = useUser();
+const { user } = useUser();
 
 const awards = ref<LocalAward[]>([]);
 const isLoading = ref<boolean>(false);
@@ -16,12 +16,11 @@ const isLoading = ref<boolean>(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
-    const user = await getUser();
 
     awards.value = (await awardsApi.getAllAwards())
       ?.map<LocalAward>((award) => ({
         ...award,
-        owned: user ? userOwnsAward(award, user) : false,
+        owned: user.value ? userOwnsAward(award, user.value) : false,
       }))
       .sort((x, y) => (x.owned === y.owned ? 0 : x.owned ? -1 : 1));
     isLoading.value = false;

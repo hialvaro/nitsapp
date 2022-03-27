@@ -1,17 +1,9 @@
 <script setup lang="ts">
 import useUser from "@/compositions/useUser";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
-const { getUser, logout } = useUser();
-
-const isLoggedIn = ref<boolean>(false);
-
-onMounted(async () => {
-  const user = await getUser();
-
-  isLoggedIn.value = Boolean(user);
-});
+const { logout, user } = useUser();
 
 const router = useRouter();
 
@@ -20,7 +12,6 @@ async function handleLogout(): Promise<void> {
     await logout();
   } catch (error) {
     console.error(error);
-
     router.push({ name: "Home" });
   }
 }
@@ -40,26 +31,20 @@ async function handleLogout(): Promise<void> {
         <router-link class="cursor-pointer" :to="{ name: 'Home' }"
           >Premis</router-link
         >
-        <router-link
-          v-if="isLoggedIn"
-          class="cursor-pointer"
-          :to="{ name: 'Redeem' }"
+        <router-link v-if="user" class="cursor-pointer" :to="{ name: 'Redeem' }"
           >Reclama</router-link
         >
-        <!--<router-link v-if="isLoggedIn" class="cursor-pointer" :to="{name:''}">Users</router-link>-->
-        <router-link
-          v-if="!isLoggedIn"
-          class="cursor-pointer"
-          :to="{ name: 'Login' }"
+        <!--<router-link v-if="user" class="cursor-pointer" :to="{name:''}">Users</router-link>-->
+        <router-link v-if="!user" class="cursor-pointer" :to="{ name: 'Login' }"
           >Login</router-link
         >
         <router-link
-          v-if="!isLoggedIn"
+          v-if="!user"
           class="cursor-pointer"
           :to="{ name: 'Register' }"
           >Registra't</router-link
         >
-        <li v-if="isLoggedIn" class="cursor-pointer" @click="handleLogout">
+        <li v-if="user" class="cursor-pointer" @click="handleLogout">
           Log Out
         </li>
       </ul>
