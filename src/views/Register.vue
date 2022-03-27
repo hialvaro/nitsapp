@@ -1,11 +1,10 @@
 <script setup lang="ts">
-// Vue
-import useAppwrite from "@/compositions/useAppwrite";
+import useUser from "@/compositions/useUser";
 import type { AppwriteException } from "appwrite";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
-const { registerUser } = useAppwrite();
+const { registerUser } = useUser();
 
 const router = useRouter();
 const email = ref<string>("");

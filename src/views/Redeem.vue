@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import useAppwrite from "@/compositions/useAppwrite";
+import awardsApi from "@/api/awards";
+import useUser from "@/compositions/useUser";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-const { getUser, getAwardsByCode, updateAward } = useAppwrite();
+const { getUser } = useUser();
 
 const router = useRouter();
 const code = ref<string>("");
@@ -15,7 +16,7 @@ const redeem = async () => {
     const user = await getUser();
     if (!user) return router.push({ name: "Login" });
 
-    const award = (await getAwardsByCode(code.value))[0];
+    const award = (await awardsApi.getAwardsByCode(code.value))[0];
 
     if (!award) {
       throw new Error("Aquest codi no existeix");
@@ -33,7 +34,7 @@ const redeem = async () => {
 
     award.users.push(user.$id);
 
-    await updateAward(award);
+    await awardsApi.updateAward(award);
 
     successMsg.value = `Has rebut un nou premi: ${award.title}`;
     setTimeout(() => {

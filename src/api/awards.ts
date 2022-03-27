@@ -1,29 +1,24 @@
+import appwrite from "@/appwrite";
 import type { Award } from "@/types";
-import { Query, type Appwrite, type Models } from "appwrite";
+import { Query, type Models } from "appwrite";
 
 const awardsCollectionId = "623dd13a121effab1eaf";
 
 export type AwardDocument = Award & Models.Document;
 
 const awardsApi = {
-  getAllAwards: async (appwrite: Appwrite): Promise<AwardDocument[]> =>
+  getAllAwards: async (): Promise<AwardDocument[]> =>
     (await appwrite.database.listDocuments<AwardDocument>(awardsCollectionId))
       .documents,
 
-  getAwardsByCode: async (
-    appwrite: Appwrite,
-    code: string
-  ): Promise<AwardDocument[]> =>
+  getAwardsByCode: async (code: string): Promise<AwardDocument[]> =>
     (
       await appwrite.database.listDocuments<AwardDocument>(awardsCollectionId, [
         Query.equal("code", code),
       ])
     ).documents,
 
-  updateAward: async (
-    appwrite: Appwrite,
-    award: AwardDocument
-  ): Promise<AwardDocument> =>
+  updateAward: async (award: AwardDocument): Promise<AwardDocument> =>
     await appwrite.database.updateDocument(
       awardsCollectionId,
       award.$id,

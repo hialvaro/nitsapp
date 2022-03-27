@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import useAppwrite, { type User } from "@/compositions/useAppwrite";
-import type { Award, Profile } from "@/types";
-import type { PostgrestError } from "@supabase/supabase-js";
+import useUser, { type User } from "@/compositions/useUser";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
-import { supabase } from "../supabase";
 
-const { getUser } = useAppwrite();
+const { getUser } = useUser();
 
 const data = ref<Award[] | null>(null);
 const errorMsg = ref<string | null>(null);

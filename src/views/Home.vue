@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { AwardDocument } from "@/api/awards";
-import useAppwrite, { type User } from "@/compositions/useAppwrite";
+import awardsApi from "@/api/awards";
+import useUser, { type User } from "@/compositions/useUser";
 import type { Award } from "@/types";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 type LocalAward = AwardDocument & { owned: boolean };
 
-const { getUser, getAllAwards } = useAppwrite();
+const { getUser } = useUser();
 
 const awards = ref<LocalAward[]>([]);
 const isLoading = ref<boolean>(false);
@@ -17,7 +18,7 @@ onMounted(async () => {
     isLoading.value = true;
     const user = await getUser();
 
-    awards.value = (await getAllAwards())
+    awards.value = (await awardsApi.getAllAwards())
       ?.map<LocalAward>((award) => ({
         ...award,
         owned: user ? userOwnsAward(award, user) : false,

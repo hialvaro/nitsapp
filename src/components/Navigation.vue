@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import useAppwrite from "@/compositions/useAppwrite";
+import useUser from "@/compositions/useUser";
 import { onMounted, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
-const { getUser, logout } = useAppwrite();
+const { getUser, logout } = useUser();
 
 const isLoggedIn = ref<boolean>(false);
 
