@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import useUser from "@/compositions/useUser";
-import { onMounted, ref, computed } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
 const { logout, user } = useUser();
