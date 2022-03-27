@@ -10,7 +10,6 @@ import { Server } from "@/utils/config";
 const awards = ref<any>(null);
 const isLoading = ref<boolean>(false);
 
-
 onMounted(async () => {
   // Init your Web SDK
   try {
