@@ -18,6 +18,13 @@ const awardsApi = {
       ])
     ).documents,
 
+  getAwardsById: async (id: string | string[]): Promise<AwardDocument[]> =>
+    (
+      await appwrite.database.listDocuments<AwardDocument>(awardsCollectionId, [
+        Query.equal("$id", id),
+      ])
+    ).documents,
+
   updateAward: async (award: AwardDocument): Promise<AwardDocument> =>
     await appwrite.database.updateDocument(
       awardsCollectionId,
