@@ -11,5 +11,6 @@ export type Award = {
 };
 
 export type Profile = {
-  // TODO: Add fields
+  user_id: string;
+  user_name: string;
 };

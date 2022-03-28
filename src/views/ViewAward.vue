@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import type { AwardDocument } from "@/api/awards";
 import awardsApi from "@/api/awards";
-import useUser, { type User } from "@/compositions/useUser";
-import type { Award } from "@/types";
+import profilesApi from "@/api/profiles";
+import useUser from "@/compositions/useUser";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { aw_users } from "@/appwrite";
-const route = useRoute();
-
-type LocalAward = AwardDocument;
 
 const { user } = useUser();
+const route = useRoute();
 
-const award = ref<AwardDocument[] | LocalAward | null>(null);
+type LocalAward = AwardDocument & { owned: boolean };
+
+const award = ref<AwardDocument | LocalAward | null>(null);
 const isLoading = ref<boolean>(false);
 const errorMsg = ref<string | null>(null);
 const statusMsg = ref<string | null>(null);
@@ -22,36 +21,42 @@ const currentId = route.params.awardId;
 onMounted(async () => {
   try {
     isLoading.value = true;
-    award.value = await awardsApi.getAwardsById(currentId);
-    award.value = award.value[0];
-
     if (user.value) {
       // We check if the user has this award
-      award.value = (await awardsApi.getAwardsById(currentId))?.map<LocalAward>(
-        (awrd) => ({
-          ...awrd,
-          owned: user.value ? userOwnsAward(awrd, user.value) : false,
-        })
-      );
+      award.value = await awardsApi.getAwardById(currentId);
+      award.value = {
+        ...award.value,
+        owned: user.value ? userOwnsAward(award.value, user.value) : false,
+      };
 
-      award.value = award.value[0];
-      let userList = (await aw_users.list()).users;
+      console.log(award.value);
+
+      award.value = award.value;
+      let userList = await profilesApi.getAllUsers();
+      console.log(userList);
       for (let u in award.value.users) {
         award.value.users[u] =
           userList[
-            userList.map((e) => e.$id).indexOf(award.value.users[u])
-          ].name;
+            userList.map((e) => e.user_id).indexOf(award.value.users[u])
+          ].user_name;
       }
       isLoading.value = false;
     } else {
+      console.log("error");
       //Show award as not owned
       isLoading.value = true;
-      award.value = (await awardsApi.getAwardsById(currentId))?.map<LocalAward>(
-        (awrd) => ({
-          ...awrd,
-          owned: false,
-        })
-      );
+      award.value = await awardsApi.getAwardById(currentId);
+      award.value = {
+        ...award.value,
+        owned: false,
+      };
+      let userList = await profilesApi.getAllUsers();
+      for (let u in award.value.users) {
+        award.value.users[u] =
+          userList[
+            userList.map((e) => e.user_id).indexOf(award.value.users[u])
+          ].user_name;
+      }
       isLoading.value = false;
     }
   } catch (error) {
@@ -62,7 +67,7 @@ onMounted(async () => {
   }
 });
 
-function userOwnsAward(award: Award, user: User): boolean {
+function userOwnsAward(award: LocalAward, user: any): boolean {
   if (!user || !award.users) return false;
   return award.users.includes(user.$id);
 }
