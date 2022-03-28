@@ -14,7 +14,7 @@ const errorMsg = ref<string | null>(null);
 async function handleLogin(): Promise<void> {
   try {
     await login(email.value, password.value);
-    router.push({ name: "Home" });
+    router.push({ name: "Home", params: { reload: "true" } });
   } catch (error) {
     displayError(`Error: ${(error as AppwriteException).message}`);
   }

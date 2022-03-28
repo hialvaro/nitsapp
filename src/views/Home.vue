@@ -5,6 +5,8 @@ import useUser, { type User } from "@/compositions/useUser";
 import type { Award } from "@/types";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
+import { useRoute } from "vue-router";
+const route = useRoute();
 
 type LocalAward = AwardDocument & { owned: boolean };
 
@@ -16,7 +18,9 @@ const isLoading = ref<boolean>(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
-
+    if (route.params.reload === "true") {
+      location.reload();
+    }
     awards.value = (await awardsApi.getAllAwards())
       ?.map<LocalAward>((award) => ({
         ...award,
