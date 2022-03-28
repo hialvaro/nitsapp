@@ -6,7 +6,7 @@ export type Award = {
   howmany: number;
   $id: number;
   title: string;
-  type: string;
+  type: AwardType;
   users: string[];
 };
 

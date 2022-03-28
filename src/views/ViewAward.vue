@@ -3,7 +3,7 @@ import type { AwardDocument } from "@/api/awards";
 import awardsApi from "@/api/awards";
 import useUser, { type User } from "@/compositions/useUser";
 import type { Award } from "@/types";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { aw_users } from "@/appwrite";
 const route = useRoute();
@@ -19,7 +19,7 @@ const statusMsg = ref<string | null>(null);
 
 const currentId = route.params.awardId;
 
-const getData = async () => {
+onMounted(async () => {
   try {
     isLoading.value = true;
     award.value = await awardsApi.getAwardsById(currentId);
@@ -60,19 +60,12 @@ const getData = async () => {
       errorMsg.value = null;
     }, 4000);
   }
+});
 
-  function userOwnsAward(award: Award, user: any): boolean {
-    if (!user || !award.users) return false;
-    return award.users.includes(user.$id);
-  }
-
-  return {
-    award,
-    user,
-  };
-};
-
-getData();
+function userOwnsAward(award: Award, user: User): boolean {
+  if (!user || !award.users) return false;
+  return award.users.includes(user.$id);
+}
 </script>
 
 <template>
