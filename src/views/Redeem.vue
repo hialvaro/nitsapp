@@ -22,7 +22,7 @@ const redeem = async () => {
       throw new Error("Aquest codi no existeix");
     }
 
-    if (!award.users) award.users = [];
+    //if (!award.users) award.users = [];
 
     if (award.users.includes(user.$id as string)) {
       throw new Error("Ja tens aquest premi");
