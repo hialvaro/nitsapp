@@ -24,7 +24,10 @@ const isOwned = computed<boolean>(() =>
 const userNames = ref<string[]>([]);
 
 watch(award, async () => {
-  if (!award.value) return;
+  if (!award.value) {
+    userNames.value = [];
+    return;
+  }
 
   const profiles = await profilesApi.getUsersByIds(award.value.users);
 
