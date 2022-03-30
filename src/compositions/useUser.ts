@@ -1,6 +1,6 @@
 import appwrite from "@/appwrite";
 import type { Models } from "appwrite";
-import { onMounted, ref, readonly } from "vue";
+import { onMounted, ref } from "vue";
 
 type UserPreferences = Models.Preferences;
 export type User = Models.User<UserPreferences>;
@@ -45,7 +45,7 @@ export default function useUser() {
   }
 
   return {
-    user: readonly(user),
+    user: user,
     login,
     logout,
     register,
