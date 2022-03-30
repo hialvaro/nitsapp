@@ -58,7 +58,7 @@ function userOwnsAward(award: Award, user: User): boolean {
     >
       <router-link
         v-for="award in awards"
-        :key="award.id"
+        :key="award.$id"
         :class="{ 'border-4 border-nits-light-green rounded-md': award.owned }"
         class="flex flex-col items-center bg-light-grey p-8 shadow-md cursor-pointer"
         :to="{ name: 'View-Award', params: { awardId: award.$id } }"
