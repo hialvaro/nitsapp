@@ -11,7 +11,8 @@ const { user } = useUser();
 const route = useRoute();
 
 const award = ref<AwardDocument | null>(null);
-const isLoading = ref<boolean>(false);
+const isLoadingAward = ref<boolean>(false);
+const isLoadingOwners = ref<boolean>(false);
 const errorMsg = ref<string | null>(null);
 const statusMsg = ref<string | null>(null);
 
@@ -29,15 +30,19 @@ watch(award, async () => {
     return;
   }
 
+  isLoadingOwners.value = true;
+
   const profiles = await profilesApi.getUsersByIds(award.value.users);
 
   userNames.value = award.value.users
     .map((userId) => profiles.find((p) => p.user_id === userId)?.user_name)
     .filter((name): name is string => typeof name === "string");
+
+  isLoadingOwners.value = false;
 });
 
 onMounted(async () => {
-  isLoading.value = true;
+  isLoadingAward.value = true;
 
   try {
     award.value = await awardsApi.getAwardById(awardId);
@@ -48,7 +53,7 @@ onMounted(async () => {
     }, 4000);
   }
 
-  isLoading.value = false;
+  isLoadingAward.value = false;
 });
 
 function userOwnsAward(award: AwardDocument, user: User): boolean {
@@ -62,7 +67,9 @@ function getSingleValue<T>(value: T | T[]): T {
 </script>
 
 <template>
-  <div v-if="isLoading || !award">Carregant...</div>
+  <div v-if="isLoadingAward" class="flex justify-center items-center">
+    Carregant...
+  </div>
   <div v-else class="max-w-screen-sm mx-auto px-4 py-10">
     <!-- App MSG -->
     <div
@@ -102,22 +109,16 @@ function getSingleValue<T>(value: T | T[]): T {
         />
 
         <span
-          v-if="isOwned"
+          :class="{ 'bg-nits-green': isOwned, 'bg-dark-grey': !isOwned }"
           class="mt-6 py-1 5 px-5 text-xs text-white bg-nits-green rounded-lg shadow-md"
-          >{{ award.type }}</span
-        >
-        <span
-          v-else
-          class="mt-6 py-1 5 px-5 text-xs text-white bg-dark-grey rounded-lg shadow-md"
           >{{ award.type }}</span
         >
 
         <div class="w-full mt-6">
-          <h1 v-if="isOwned" class="text-nits-green text-2xl text-center">
-            {{ award.title }}
-          </h1>
-
-          <h1 v-else class="text-dark-grey text-2xl text-center">
+          <h1
+            :class="{ 'text-nits-green': isOwned, 'text-dark-grey': !isOwned }"
+            class="text-2xl text-center"
+          >
             {{ award.title }}
           </h1>
         </div>
@@ -134,14 +135,21 @@ function getSingleValue<T>(value: T | T[]): T {
       <div
         class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
+        <div v-if="isLoadingOwners" class="flex justify-center items-center">
+          Carregant...
+        </div>
         <div
           v-for="userName in userNames"
+          v-else-if="userNames"
           :key="userName"
           class="flex flex-col items-center bg-nits-green shadow-md rounded-md cursor-pointer"
         >
           <p class="mt-2 mb-2 text-center text-xl text-nits-green-500">
             {{ userName }}
           </p>
+        </div>
+        <div v-else class="flex justify-center items-center">
+          No hi ha cap usuari que tingui aquest premi
         </div>
       </div>
     </div>
