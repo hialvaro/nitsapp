@@ -4,7 +4,7 @@ import useUser from "@/compositions/useUser";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-const { getUser } = useUser();
+const { user } = useUser();
 
 const router = useRouter();
 const code = ref<string>("");
@@ -13,8 +13,7 @@ const successMsg = ref<string | null>(null);
 
 const redeem = async () => {
   try {
-    const user = await getUser();
-    if (!user) return router.push({ name: "Login" });
+    if (!user.value) return router.push({ name: "Login" });
 
     const award = (await awardsApi.getAwardsByCode(code.value))[0];
 
@@ -24,7 +23,7 @@ const redeem = async () => {
 
     //if (!award.users) award.users = [];
 
-    if (award.users.includes(user.$id as string)) {
+    if (award.users.includes(user.value.$id as string)) {
       throw new Error("Ja tens aquest premi");
     }
 
@@ -32,7 +31,7 @@ const redeem = async () => {
       throw new Error("Aquest premi està esgotat");
     }
 
-    award.users.push(user.$id);
+    award.users.push(user.value.$id);
 
     await awardsApi.updateAward(award);
 

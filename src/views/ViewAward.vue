@@ -2,74 +2,59 @@
 import type { AwardDocument } from "@/api/awards";
 import awardsApi from "@/api/awards";
 import profilesApi from "@/api/profiles";
-import useUser from "@/compositions/useUser";
-import { ref, onMounted } from "vue";
+import useUser, { type User } from "@/compositions/useUser";
+import type { AppwriteException } from "appwrite";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const { user } = useUser();
 const route = useRoute();
 
-type LocalAward = AwardDocument & { owned: boolean };
-
-const award = ref<AwardDocument | LocalAward | null>(null);
+const award = ref<AwardDocument | null>(null);
 const isLoading = ref<boolean>(false);
 const errorMsg = ref<string | null>(null);
 const statusMsg = ref<string | null>(null);
 
-const currentId = route.params.awardId;
+const awardId: string = getSingleValue(route.params.awardId);
+
+const isOwned = computed<boolean>(() =>
+  award.value && user.value ? userOwnsAward(award.value, user.value) : false
+);
+
+const userNames = ref<string[]>([]);
+
+watch(award, async () => {
+  if (!award.value) return;
+
+  const profiles = await profilesApi.getUsersByIds(award.value.users);
+
+  userNames.value = award.value.users
+    .map((userId) => profiles.find((p) => p.user_id === userId)?.user_name)
+    .filter((name): name is string => typeof name === "string");
+});
 
 onMounted(async () => {
+  isLoading.value = true;
+
   try {
-    isLoading.value = true;
-    if (user.value) {
-      // We check if the user has this award
-      award.value = await awardsApi.getAwardById(currentId);
-      award.value = {
-        ...award.value,
-        owned: user.value ? userOwnsAward(award.value, user.value) : false,
-      };
-
-      console.log(award.value);
-
-      award.value = award.value;
-      let userList = await profilesApi.getAllUsers();
-      console.log(userList);
-      for (let u in award.value.users) {
-        award.value.users[u] =
-          userList[
-            userList.map((e) => e.user_id).indexOf(award.value.users[u])
-          ].user_name;
-      }
-      isLoading.value = false;
-    } else {
-      console.log("error");
-      //Show award as not owned
-      isLoading.value = true;
-      award.value = await awardsApi.getAwardById(currentId);
-      award.value = {
-        ...award.value,
-        owned: false,
-      };
-      let userList = await profilesApi.getAllUsers();
-      for (let u in award.value.users) {
-        award.value.users[u] =
-          userList[
-            userList.map((e) => e.user_id).indexOf(award.value.users[u])
-          ].user_name;
-      }
-      isLoading.value = false;
-    }
+    award.value = await awardsApi.getAwardById(awardId);
   } catch (error) {
-    errorMsg.value = (error as any).message;
+    errorMsg.value = (error as AppwriteException).message;
     setTimeout(() => {
       errorMsg.value = null;
     }, 4000);
   }
+
+  isLoading.value = false;
 });
 
-function userOwnsAward(award: LocalAward, user: any): boolean {
+function userOwnsAward(award: AwardDocument, user: User): boolean {
   if (!user || !award.users) return false;
   return award.users.includes(user.$id);
+}
+
+function getSingleValue<T>(value: T | T[]): T {
+  return Array.isArray(value) ? value[0] : value;
 }
 </script>
 
@@ -93,28 +78,28 @@ function userOwnsAward(award: LocalAward, user: any): boolean {
       >
         <div v-if="user" class="flex absolute left-2 top-2 gap-x-2">
           <div
-            v-if="award.owned"
+            v-if="isOwned"
             class="h-10 w-10 rounded-full flex justify-center items-center shadow-lg"
           >
-            <img class="h-10 w-auto" src="@/assets/images/tick.svg" alt />
+            <img class="h-10 w-auto" src="@/assets/images/tick.svg" :alt="''" />
           </div>
         </div>
 
         <img
-          v-if="award.owned"
+          v-if="isOwned"
           class="h-24 w-auto"
           src="@/assets/images/ice.png"
-          alt
+          :alt="''"
         />
         <img
           v-else
           class="h-24 w-auto"
           src="@/assets/images/question.svg"
-          alt
+          :alt="''"
         />
 
         <span
-          v-if="award.owned"
+          v-if="isOwned"
           class="mt-6 py-1 5 px-5 text-xs text-white bg-nits-green rounded-lg shadow-md"
           >{{ award.type }}</span
         >
@@ -125,7 +110,7 @@ function userOwnsAward(award: LocalAward, user: any): boolean {
         >
 
         <div class="w-full mt-6">
-          <h1 v-if="award.owned" class="text-nits-green text-2xl text-center">
+          <h1 v-if="isOwned" class="text-nits-green text-2xl text-center">
             {{ award.title }}
           </h1>
 
@@ -147,12 +132,12 @@ function userOwnsAward(award: LocalAward, user: any): boolean {
         class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
         <div
-          v-for="(user, index) in award.users"
-          :key="index"
+          v-for="userName in userNames"
+          :key="userName"
           class="flex flex-col items-center bg-nits-green shadow-md rounded-md cursor-pointer"
         >
           <p class="mt-2 mb-2 text-center text-xl text-nits-green-500">
-            {{ user }}
+            {{ userName }}
           </p>
         </div>
       </div>

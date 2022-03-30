@@ -6,23 +6,28 @@ const profilesCollectionId = "6241c3c2e864fc09a4fa";
 export type ProfileDocument = Profile & Models.Document;
 
 const profilesApi = {
-  getAllUsers: async (): Promise<ProfileDocument[]> => {
-    return (
+  getAllUsers: async (): Promise<ProfileDocument[]> =>
+    (
       await appwrite.database.listDocuments<ProfileDocument>(
         profilesCollectionId
       )
-    ).documents;
-  },
+    ).documents,
 
-  getUserById: async (id: string | string[]): Promise<ProfileDocument> => {
-    const profile = (
+  getUserById: async (id: string): Promise<ProfileDocument> =>
+    (
       await appwrite.database.listDocuments<ProfileDocument>(
         profilesCollectionId,
         [Query.equal("$id", id)]
       )
-    ).documents[0];
-    return profile;
-  },
+    ).documents[0],
+
+  getUsersByIds: async (ids: string[]): Promise<ProfileDocument[]> =>
+    (
+      await appwrite.database.listDocuments<ProfileDocument>(
+        profilesCollectionId,
+        [Query.equal("$id", ids)]
+      )
+    ).documents,
 
   createProfile: async (profile: Profile): Promise<Models.Document> =>
     await appwrite.database.createDocument(
